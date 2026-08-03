@@ -152,7 +152,7 @@ function prepareWorkspace(
       "const path = require('path');",
       "const src = path.join(__dirname, 'src');",
       "for (const file of fs.readdirSync(src)) {",
-      "  if (file.endsWith('.purs')) console.log(path.join(src, file));",
+      "  if (file.endsWith('.purs')) console.log(path.join('src', file));",
       "}",
       "",
     ].join("\n"),
