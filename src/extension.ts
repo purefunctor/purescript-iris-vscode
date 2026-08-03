@@ -1,6 +1,6 @@
 import { ExtensionContext, Uri, workspace } from "vscode";
 import { resolveConfiguration } from "./configuration";
-import { decodeWindowsDriveSeparator } from "./uri";
+import { normalizeWindowsFileUri } from "./uri";
 
 import {
   LanguageClient,
@@ -42,7 +42,7 @@ export function activate(context: ExtensionContext) {
       code2Protocol: (uri) => {
         const serializedUri = uri.toString();
         return process.platform === "win32"
-          ? decodeWindowsDriveSeparator(serializedUri)
+          ? normalizeWindowsFileUri(serializedUri)
           : serializedUri;
       },
       protocol2Code: (uri) => Uri.parse(uri),
