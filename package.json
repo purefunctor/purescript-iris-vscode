@@ -23,7 +23,7 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "check": "tsc --noEmit",
-    "compile-tests": "tsc -p tsconfig.test.json",
+    "compile-tests": "node -e \"require('fs').rmSync('out', { recursive: true, force: true })\" && tsc -p tsconfig.test.json",
     "compile": "npm run check && node esbuild.js --production",
     "package": "vsce package --no-dependencies",
     "test": "npm run check && npm run compile && npm run test:unit && npm run test:integration",
@@ -33,12 +33,14 @@
     "format": "prettier -w src/**/*.ts tsconfig.json package.json esbuild.js"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.10",
     "@types/node": "^22.19.17",
     "@types/vscode": "1.98.0",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.9.1",
     "dotenv": "^17.4.2",
     "esbuild": "^0.28.1",
+    "mocha": "^11.8.0",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6",
