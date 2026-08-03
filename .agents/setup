@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+alexandrite_root="$(cd "$repository_root/../repos/purescript-alexandrite" 2>/dev/null && pwd)" || {
+  echo "Expected the linked purescript-alexandrite repository beside this checkout." >&2
+  exit 1
+}
+
+if [[ "$(node --version 2>/dev/null || true)" != v22.* ]]; then
+  echo "Installing Node.js 22..."
+  node_directory="$HOME/.local/share/node-v22"
+  node_archive_directory="$(mktemp -d)"
+  trap 'rm -rf "$node_archive_directory"' EXIT
+
+  curl --proto '=https' --tlsv1.2 -fsSL \
+    https://nodejs.org/dist/latest-v22.x/SHASUMS256.txt \
+    -o "$node_archive_directory/SHASUMS256.txt"
+  node_archive="$(awk '$2 ~ /^node-v.*-linux-x64\.tar\.xz$/ { print $2 }' "$node_archive_directory/SHASUMS256.txt")"
+  curl --proto '=https' --tlsv1.2 -fsSL \
+    "https://nodejs.org/dist/latest-v22.x/$node_archive" \
+    -o "$node_archive_directory/$node_archive"
+  (
+    cd "$node_archive_directory"
+    grep "  $node_archive$" SHASUMS256.txt | sha256sum --check --status
+  )
+
+  rm -rf "$node_directory"
+  mkdir -p "$node_directory" "$HOME/.local/bin"
+  tar -xJf "$node_archive_directory/$node_archive" \
+    --strip-components=1 \
+    -C "$node_directory"
+  for executable in node npm npx corepack; do
+    ln -sfn "$node_directory/bin/$executable" "$HOME/.local/bin/$executable"
+  done
+  hash -r
+fi
+
+echo "Installing the Alexandrite Rust toolchain..."
+"$alexandrite_root/.agents/setup"
+export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
+
+echo "Building the linked Alexandrite language server..."
+cargo build \
+  --manifest-path "$alexandrite_root/Cargo.toml" \
+  --locked \
+  -p purescript-alexandrite \
+  --bin purescript-alexandrite
+
+if ! command -v xvfb-run >/dev/null 2>&1; then
+  echo "Installing the virtual display used by integration tests..."
+  if [[ "$(id -u)" -eq 0 ]]; then
+    apt-get update
+    apt-get install -y xvfb
+  else
+    sudo apt-get update
+    sudo apt-get install -y xvfb
+  fi
+fi
+
+echo "Installing extension dependencies..."
+npm ci
+
+touch "$repository_root/.env"
+if ! grep -q '^ALEXANDRITE_PATH=' "$repository_root/.env"; then
+  printf 'ALEXANDRITE_PATH=%s\n' \
+    "$alexandrite_root/target/debug/purescript-alexandrite" \
+    >> "$repository_root/.env"
+fi
+if ! grep -q '^VSCODE_VERSION=' "$repository_root/.env"; then
+  printf 'VSCODE_VERSION=1.98.0\n' >> "$repository_root/.env"
+fi
+
+echo "Orb setup complete."

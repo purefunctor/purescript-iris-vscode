@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+alexandrite_executable="$repository_root/../repos/purescript-alexandrite/target/debug/purescript-alexandrite"
+
+if [[ ! -x "$alexandrite_executable" ]]; then
+  echo "The linked Alexandrite executable is missing; run .agents/setup to rebuild it." >&2
+fi
+
+echo "Orb resume checks complete."
