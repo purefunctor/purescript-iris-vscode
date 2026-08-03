@@ -23,34 +23,85 @@ async function main() {
     "workspaces",
     "alexandrite",
   );
+  const userDataPath = path.resolve(
+    extensionDevelopmentPath,
+    ".vscode-test",
+    "user-data",
+    "alexandrite",
+  );
+  const extensionsPath = path.resolve(
+    extensionDevelopmentPath,
+    ".vscode-test",
+    "extensions",
+    "alexandrite",
+  );
+  const fixturesPath = path.resolve(
+    extensionDevelopmentPath,
+    "test",
+    "integration",
+    "fixtures",
+  );
   const alexandritePath = requireExecutablePath("ALEXANDRITE_PATH");
 
-  prepareWorkspace(workspacePath, alexandritePath);
+  prepareWorkspace(workspacePath, fixturesPath, alexandritePath);
+  fs.rmSync(userDataPath, { recursive: true, force: true });
+  fs.rmSync(extensionsPath, { recursive: true, force: true });
 
   const vscodeExecutablePath = await downloadAndUnzipVSCode(
     process.env.VSCODE_VERSION,
   );
-  installExtension(vscodeExecutablePath, "nwolverson.language-purescript");
+  installExtension(
+    vscodeExecutablePath,
+    extensionsPath,
+    "nwolverson.language-purescript",
+  );
 
   await runTests({
     vscodeExecutablePath,
     extensionDevelopmentPath,
     extensionTestsPath,
-    launchArgs: [workspacePath],
+    launchArgs: [
+      workspacePath,
+      "--user-data-dir",
+      userDataPath,
+      "--extensions-dir",
+      extensionsPath,
+      "--disable-workspace-trust",
+      "--skip-release-notes",
+      "--skip-welcome",
+    ],
     extensionTestsEnv: {
       ALEXANDRITE_PATH: alexandritePath,
     },
   });
 }
 
-function installExtension(vscodeExecutablePath: string, extensionId: string) {
+function installExtension(
+  vscodeExecutablePath: string,
+  extensionsPath: string,
+  extensionId: string,
+) {
   const [command, ...args] =
     resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
-  const result = spawnSync(command, [...args, "--install-extension", extensionId], {
-    encoding: "utf8",
-    shell: process.platform === "win32",
-    stdio: "inherit",
-  });
+  const isolatedArgs = args.filter(
+    (argument) => !argument.startsWith("--extensions-dir"),
+  );
+  const result = spawnSync(
+    command,
+    [
+      ...isolatedArgs,
+      "--extensions-dir",
+      extensionsPath,
+      "--install-extension",
+      extensionId,
+      "--force",
+    ],
+    {
+      encoding: "utf8",
+      shell: process.platform === "win32",
+      stdio: "inherit",
+    },
+  );
 
   if (result.status !== 0) {
     throw new Error(`Failed to install VS Code extension dependency: ${extensionId}`);
@@ -80,30 +131,29 @@ function requireExecutablePath(environmentVariable: string) {
   return executablePath;
 }
 
-function prepareWorkspace(workspacePath: string, alexandritePath: string) {
+function prepareWorkspace(
+  workspacePath: string,
+  fixturesPath: string,
+  alexandritePath: string,
+) {
   const vscodeDirectory = path.join(workspacePath, ".vscode");
   const srcDirectory = path.join(workspacePath, "src");
   fs.mkdirSync(vscodeDirectory, { recursive: true });
-  fs.mkdirSync(srcDirectory, { recursive: true });
+  fs.rmSync(srcDirectory, { recursive: true, force: true });
+  fs.cpSync(path.join(fixturesPath, "workspace"), srcDirectory, {
+    recursive: true,
+  });
 
   const sourceFilesScript = path.join(workspacePath, "source-files.js");
   fs.writeFileSync(
-    path.join(srcDirectory, "Main.purs"),
-    [
-      "module Main where",
-      "",
-      "import Prelude",
-      "",
-      "main :: Unit",
-      "main = unit",
-      "",
-    ].join("\n"),
-  );
-  fs.writeFileSync(
     sourceFilesScript,
     [
+      "const fs = require('fs');",
       "const path = require('path');",
-      "console.log(path.join(__dirname, 'src', 'Main.purs'));",
+      "const src = path.join(__dirname, 'src');",
+      "for (const file of fs.readdirSync(src)) {",
+      "  if (file.endsWith('.purs')) console.log(path.join('src', file));",
+      "}",
       "",
     ].join("\n"),
   );

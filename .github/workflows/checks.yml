@@ -7,19 +7,19 @@ on:
   pull_request:
 
 permissions:
+  attestations: read
   contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  BUN_VERSION: 1.3.14
-
 jobs:
   node:
     name: Unit tests
     runs-on: ubuntu-latest
+    outputs:
+      vscode_version: ${{ steps.vscode_version.outputs.version }}
 
     steps:
       - name: Checkout repository
@@ -30,6 +30,15 @@ jobs:
         with:
           node-version: 22
           cache: npm
+
+      - name: Resolve minimum VS Code version
+        id: vscode_version
+        run: >-
+          node -e 'const fs = require("fs");
+          const range = require("./package.json").engines.vscode;
+          const version = range.match(/\d+\.\d+\.\d+/)?.[0];
+          if (!version) throw new Error(`Cannot resolve a VS Code version from ${range}`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${version}\n`);'
 
       - name: Install dependencies
         run: npm ci
@@ -44,7 +53,7 @@ jobs:
         run: npm run test:unit
 
   integration:
-    name: Integration tests (${{ matrix.platform }})
+    name: Integration tests (${{ matrix.platform }}, VS Code ${{ matrix.version_label }})
     runs-on: ${{ matrix.os }}
     needs: node
 
@@ -54,22 +63,32 @@ jobs:
         include:
           - platform: Linux
             os: ubuntu-24.04
-            alexandrite-asset: purescript-alexandrite-x86_64-unknown-linux-gnu.tar.gz
+            version_label: minimum
+            vscode_version: ${{ needs.node.outputs.vscode_version }}
             alexandrite-executable: purescript-alexandrite
             test-command: xvfb-run -a npm run test:integration
           - platform: macOS
             os: macos-14
-            alexandrite-asset: purescript-alexandrite-universal-apple-darwin.tar.gz
+            version_label: minimum
+            vscode_version: ${{ needs.node.outputs.vscode_version }}
             alexandrite-executable: purescript-alexandrite
             test-command: npm run test:integration
           - platform: Windows
             os: windows-2022
-            alexandrite-asset: purescript-alexandrite-x86_64-pc-windows-msvc.zip
+            version_label: minimum
+            vscode_version: ${{ needs.node.outputs.vscode_version }}
             alexandrite-executable: purescript-alexandrite.exe
             test-command: npm run test:integration
+          - platform: Linux
+            os: ubuntu-24.04
+            version_label: stable
+            vscode_version: stable
+            alexandrite-executable: purescript-alexandrite
+            test-command: xvfb-run -a npm run test:integration
 
     env:
-      VSCODE_VERSION: 1.98.0
+      GH_TOKEN: ${{ github.token }}
+      VSCODE_VERSION: ${{ matrix.vscode_version }}
 
     steps:
       - name: Checkout repository
@@ -81,42 +100,37 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Install Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Resolve latest Alexandrite release
-        id: alexandrite
-        env:
-          RELEASE_ASSET: ${{ matrix.alexandrite-asset }}
-          RELEASE_REPOSITORY: purefunctor/purescript-alexandrite
-          GH_TOKEN: ${{ github.token }}
-        run: bun scripts/resolve-latest-release-assets.mjs
-
       - name: Install Alexandrite
+        if: runner.os != 'Windows'
         env:
-          RELEASE_ASSET: ${{ matrix.alexandrite-asset }}
-          RELEASE_DIGEST: ${{ steps.alexandrite.outputs.digest }}
-          RELEASE_EXECUTABLE: ${{ matrix.alexandrite-executable }}
-          RELEASE_EXECUTABLE_ENVIRONMENT_VARIABLE: ALEXANDRITE_PATH
-          RELEASE_REPOSITORY: purefunctor/purescript-alexandrite
-          RELEASE_TAG: ${{ steps.alexandrite.outputs.tag }}
-          GH_TOKEN: ${{ github.token }}
-        run: bun scripts/install-release-asset.mjs
+          ALEXANDRITE_INSTALL_DIR: ${{ runner.temp }}/alexandrite/bin
+        run: >-
+          curl --proto '=https' --tlsv1.2 -LsSf
+          https://raw.githubusercontent.com/purefunctor/purescript-alexandrite/main/install.sh
+          | sh
 
-      - name: Cache VS Code test dependencies
+      - name: Install Alexandrite on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          ALEXANDRITE_INSTALL_DIR: ${{ runner.temp }}/alexandrite/bin
+        run: >-
+          irm https://raw.githubusercontent.com/purefunctor/purescript-alexandrite/main/install.ps1
+          | iex
+
+      - name: Cache minimum VS Code
+        if: matrix.version_label == 'minimum'
         uses: actions/cache@v5
         with:
-          path: |
-            .vscode-test/vscode-*
-            ~/.vscode/extensions/nwolverson.language-purescript-*
-          key: vscode-test-${{ runner.os }}-${{ env.VSCODE_VERSION }}-language-purescript
+          path: .vscode-test/vscode-*
+          key: vscode-test-${{ runner.os }}-${{ env.VSCODE_VERSION }}
 
       - name: Run integration tests
+        env:
+          ALEXANDRITE_PATH: ${{ runner.temp }}/alexandrite/bin/${{ matrix.alexandrite-executable }}
         run: ${{ matrix.test-command }}
 
   package:

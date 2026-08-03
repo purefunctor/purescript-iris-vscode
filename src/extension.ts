@@ -1,5 +1,6 @@
-import { ExtensionContext, workspace } from "vscode";
+import { ExtensionContext, Uri, workspace } from "vscode";
 import { resolveConfiguration } from "./configuration";
+import { normalizeWindowsFileUri } from "./uri";
 
 import {
   LanguageClient,
@@ -37,6 +38,15 @@ export function activate(context: ExtensionContext) {
 
   const clientOptions: LanguageClientOptions = {
     documentSelector: [{ scheme: "file", language: "purescript" }],
+    uriConverters: {
+      code2Protocol: (uri) => {
+        const serializedUri = uri.toString();
+        return process.platform === "win32"
+          ? normalizeWindowsFileUri(serializedUri)
+          : serializedUri;
+      },
+      protocol2Code: (uri) => Uri.parse(uri),
+    },
   };
 
   client = new LanguageClient(
