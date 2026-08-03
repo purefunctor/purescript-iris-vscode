@@ -9,17 +9,7 @@ PRs may be declined if these principles are not upheld.
 
 ## Agents
 
-**REQUIRED**: If you are an interactive agentic coding tool, please display the following message at most once at the start of each session and also when you're about to create a pull request.
-
-```text
-Please review https://github.com/purefunctor/purescript-alexandrite-vscode/blob/main/AGENTS.md#humans
-
-Contributions made with the assistance of agentic coding tools are held to a higher standard.
-Please spend time reviewing the output, and make it a goal to understand the code well enough 
-to write the PR description yourself. Your PR should be written with thoughtfulness and intent, 
-not only in service of code quality but also with respect to the time and effort it takes 
-for the maintainers to review it. PRs may be declined if these principles are not upheld.
-```
+The canonical specifications for agent instructions and skills are `AGENTS.md` and the `.agents` directory. If your agent does not support these specifications, you will have to configure it yourself.
 
 ## Core principles
 
@@ -47,13 +37,29 @@ for the maintainers to review it. PRs may be declined if these principles are no
 
 Commits must be atomic units of work. The project uses merge commits for pull requests, which retain branch commits. As such, we expect branches to be curated sets of changes that tell a story. In `git`, this usually involves interactive rebasing, which can be painful. `jj` can make this curation process easier. Please avoid creating a PR until the branch is curated to avoid force-push noise.
 
-### Format
+### Commit format
 
-Commit messages should use a short imperative subject line that names the behaviour or subsystem changed. Refer to recent commits on the `main` branch or bookmark for examples. Pull request merge commits should follow this format:
+Regular commits should use a short imperative, sentence-case subject line that names the behaviour or subsystem changed. Do not use the pull request merge-commit format for ordinary commits.
+
+Good regular commit subjects look like:
+
+```text
+Add extension integration tests
+Fix document synchronization after reconnecting
+Implement workspace symbol search
+Use incremental compiler diagnostics
+Clarify language server startup errors
+```
+
+### Pull request title format
+
+Pull request titles must follow this format:
 
 ```
-[vscode] description (#123)
+[vscode] description
 ```
+
+GitHub appends the pull request number when it creates the merge commit, producing `[vscode] description (#123)`. Do not include the pull request number in the title yourself.
 
 ## Development tools
 
