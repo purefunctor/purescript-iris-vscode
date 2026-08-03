@@ -87,8 +87,6 @@ jobs:
             test-command: xvfb-run -a npm run test:integration
 
     env:
-      ALEXANDRITE_INSTALL_DIR: ${{ runner.temp }}/alexandrite/bin
-      ALEXANDRITE_PATH: ${{ runner.temp }}/alexandrite/bin/${{ matrix.alexandrite-executable }}
       GH_TOKEN: ${{ github.token }}
       VSCODE_VERSION: ${{ matrix.vscode_version }}
 
@@ -107,6 +105,8 @@ jobs:
 
       - name: Install Alexandrite
         if: runner.os != 'Windows'
+        env:
+          ALEXANDRITE_INSTALL_DIR: ${{ runner.temp }}/alexandrite/bin
         run: >-
           curl --proto '=https' --tlsv1.2 -LsSf
           https://raw.githubusercontent.com/purefunctor/purescript-alexandrite/main/install.sh
@@ -115,6 +115,8 @@ jobs:
       - name: Install Alexandrite on Windows
         if: runner.os == 'Windows'
         shell: pwsh
+        env:
+          ALEXANDRITE_INSTALL_DIR: ${{ runner.temp }}/alexandrite/bin
         run: >-
           irm https://raw.githubusercontent.com/purefunctor/purescript-alexandrite/main/install.ps1
           | iex
@@ -127,6 +129,8 @@ jobs:
           key: vscode-test-${{ runner.os }}-${{ env.VSCODE_VERSION }}
 
       - name: Run integration tests
+        env:
+          ALEXANDRITE_PATH: ${{ runner.temp }}/alexandrite/bin/${{ matrix.alexandrite-executable }}
         run: ${{ matrix.test-command }}
 
   package:
