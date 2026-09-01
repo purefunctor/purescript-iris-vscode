@@ -68,9 +68,46 @@ GitHub appends the pull request number when it creates the merge commit, produci
 * Use `npm run compile` to type-check and build the production esbuild bundle.
 * Use `npm run watch` while iterating locally in the VS Code Extension Development Host.
 
+### Tests
+* Use `npm run test:unit` for unit tests.
+* Use `npm run test:integration` for VS Code integration tests. Set `ALEXANDRITE_PATH` to an absolute path to an executable Alexandrite binary; see `.env.example`.
+* Use `npm test` to run type checking, the production build, unit tests, and integration tests together.
+
+Focused test runs are useful while iterating, but they are not sufficient before pushing. Before pushing a change that affects integration tests, run the complete integration test suite and confirm that it passes.
+
 ### Packaging
 * Use `npm run package` to compile and create a VSIX with `@vscode/vsce`.
 * Run `npm install` after dependency changes so `package-lock.json` stays in sync.
 
 ### Formatting
 * Use `npm run format` to format `src/**/*.ts`, `tsconfig.json`, `package.json`, and `esbuild.js` with Prettier.
+
+## Code style
+
+In addition to the core principles, follow the project's existing conventions for variable names, argument ordering, module organisation, and formatting.
+
+For example:
+
+```typescript
+// Yes: Keep fluent calls together when each call fits on one line.
+const normalizedNames = names
+  .map((name) => name.trim())
+  .filter(Boolean);
+
+// No: Do not break immediately after `=`.
+const normalizedNames =
+  names.map((name) => name.trim()).filter(Boolean);
+
+// Yes: Name meaningful intermediate results while keeping simple expressions inline.
+const serializedUri = uri.toString();
+return process.platform === "win32"
+  ? normalizeWindowsFileUri(serializedUri)
+  : serializedUri;
+
+// No: Do not introduce an intermediate binding for every expression.
+const platform = process.platform;
+const isWindows = platform === "win32";
+const serializedUri = uri.toString();
+const normalizedUri = normalizeWindowsFileUri(serializedUri);
+return isWindows ? normalizedUri : serializedUri;
+```
