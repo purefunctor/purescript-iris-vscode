@@ -1,9 +1,9 @@
 ## Humans
 
-Thank you for taking interest in contributing to Alexandrite. We welcome contributions assisted by agentic coding tools that follow these principles:
+Thank you for taking interest in contributing to Iris. We welcome contributions assisted by agentic coding tools that follow these principles:
 
 * **Understand the problem that the PR is trying to solve.** Please do not defer to the agentic coding tool to write the PR description for you. Write PR descriptions with thoughtfulness and intent. Agentic review tools like CodeRabbit are used in the project to assist maintainers.
-* **Improve quality, not quantity.** Alexandrite is a fast-moving project, but its maintainers are only human. We want to build a compiler for posterity, one that can withstand the test of time. Shipping features quickly can be tempting, but you should use those time savings to invest in improving quality.
+* **Improve quality, not quantity.** Iris is a fast-moving project, but its maintainers are only human. We want to build a compiler for posterity, one that can withstand the test of time. Shipping features quickly can be tempting, but you should use those time savings to invest in improving quality.
 
 PRs may be declined if these principles are not upheld.
 
@@ -70,7 +70,7 @@ GitHub appends the pull request number when it creates the merge commit, produci
 
 ### Tests
 * Use `npm run test:unit` for unit tests.
-* Use `npm run test:integration` for VS Code integration tests. Set `ALEXANDRITE_PATH` to an absolute path to an executable Alexandrite binary; see `.env.example`.
+* Use `npm run test:integration` for VS Code integration tests. Set `IRIS_PATH` to an absolute path to an executable Iris binary; see `.env.example`.
 * Use `npm test` to run type checking, the production build, unit tests, and integration tests together.
 
 Focused test runs are useful while iterating, but they are not sufficient before pushing. Before pushing a change that affects integration tests, run the complete integration test suite and confirm that it passes.

@@ -12,10 +12,10 @@ import {
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
-  const config = workspace.getConfiguration("alexandrite");
+  const config = workspace.getConfiguration("iris");
   const legacyConfig = workspace.getConfiguration("purescriptAnalyzer");
   const resolvedConfig = resolveConfiguration({
-    alexandrite: {
+    iris: {
       serverPath: config.get<string>("serverPath"),
       sourceCommand: config.get<string>("sourceCommand"),
     },
@@ -49,12 +49,7 @@ export function activate(context: ExtensionContext) {
     },
   };
 
-  client = new LanguageClient(
-    "alexandrite",
-    "Alexandrite",
-    serverOptions,
-    clientOptions,
-  );
+  client = new LanguageClient("iris", "Iris", serverOptions, clientOptions);
 
   return client.start();
 }

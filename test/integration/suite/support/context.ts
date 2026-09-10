@@ -96,19 +96,16 @@ async function initialize(): Promise<IntegrationTestContext> {
   const extension = vscode.extensions.getExtension(
     "purefunctor.purescript-analyzer",
   );
-  assert.ok(extension, "Expected Alexandrite to be installed.");
+  assert.ok(extension, "Expected Iris to be installed.");
 
-  await waitUntil(
-    "Alexandrite to activate",
-    () => extension.isActive || undefined,
-  );
+  await waitUntil("Iris to activate", () => extension.isActive || undefined);
 
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
   assert.ok(workspaceFolder, "Expected the test workspace to be open.");
   const context = { extension, workspaceFolder };
   const document = await openWorkspaceDocument(context, "Main.purs");
 
-  await waitUntil("Alexandrite to provide document symbols", async () => {
+  await waitUntil("Iris to provide document symbols", async () => {
     const symbols = await vscode.commands.executeCommand<
       (vscode.DocumentSymbol | vscode.SymbolInformation)[] | undefined
     >("vscode.executeDocumentSymbolProvider", document.uri);

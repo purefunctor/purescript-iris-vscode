@@ -2,8 +2,8 @@
 set -euo pipefail
 
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-alexandrite_root="$(cd "$repository_root/../repos/purescript-alexandrite" 2>/dev/null && pwd)" || {
-  echo "Expected the linked purescript-alexandrite repository beside this checkout." >&2
+iris_root="$(cd "$repository_root/../repos/purescript-iris" 2>/dev/null && pwd)" || {
+  echo "Expected the linked purescript-iris repository beside this checkout." >&2
   exit 1
 }
 
@@ -36,16 +36,17 @@ if [[ "$(node --version 2>/dev/null || true)" != v22.* ]]; then
   hash -r
 fi
 
-echo "Installing the Alexandrite Rust toolchain..."
-"$alexandrite_root/.agents/setup"
-export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
+(
+  cd "$iris_root"
+  echo "Installing the Iris development tools..."
+  .agents/setup
 
-echo "Building the linked Alexandrite language server..."
-cargo build \
-  --manifest-path "$alexandrite_root/Cargo.toml" \
-  --locked \
-  -p purescript-alexandrite \
-  --bin purescript-alexandrite
+  echo "Building the linked Iris language server..."
+  "$HOME/.local/bin/mise" exec -- cargo build \
+    --locked \
+    -p purescript-iris \
+    --bin iris
+)
 
 if ! command -v xvfb-run >/dev/null 2>&1; then
   echo "Installing the virtual display used by integration tests..."
@@ -62,9 +63,9 @@ echo "Installing extension dependencies..."
 npm ci
 
 touch "$repository_root/.env"
-if ! grep -q '^ALEXANDRITE_PATH=' "$repository_root/.env"; then
-  printf 'ALEXANDRITE_PATH=%s\n' \
-    "$alexandrite_root/target/debug/purescript-alexandrite" \
+if ! grep -q '^IRIS_PATH=' "$repository_root/.env"; then
+  printf 'IRIS_PATH=%s\n' \
+    "$iris_root/target/debug/iris" \
     >> "$repository_root/.env"
 fi
 if ! grep -q '^VSCODE_VERSION=' "$repository_root/.env"; then

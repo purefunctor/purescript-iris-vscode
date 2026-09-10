@@ -4,11 +4,18 @@ import { describe, test } from "vitest";
 import packageJson = require("../../package.json");
 
 describe("manifest", () => {
+  test("uses Iris branding without changing the Marketplace identity", () => {
+    assert.strictEqual(packageJson.displayName, "purescript-iris");
+    assert.strictEqual(packageJson.contributes.configuration.title, "Iris");
+    assert.strictEqual(packageJson.name, "purescript-analyzer");
+    assert.strictEqual(packageJson.publisher, "purefunctor");
+  });
+
   test("contributes preferred and legacy settings", () => {
     const properties = packageJson.contributes.configuration.properties;
 
-    assert.ok(properties["alexandrite.serverPath"]);
-    assert.ok(properties["alexandrite.sourceCommand"]);
+    assert.ok(properties["iris.serverPath"]);
+    assert.ok(properties["iris.sourceCommand"]);
     assert.ok(properties["purescriptAnalyzer.serverPath"]);
     assert.ok(properties["purescriptAnalyzer.sourceCommand"]);
   });
@@ -16,7 +23,7 @@ describe("manifest", () => {
   test("keeps server path defaults empty for runtime fallback", () => {
     const properties = packageJson.contributes.configuration.properties;
 
-    assert.strictEqual(properties["alexandrite.serverPath"].default, "");
+    assert.strictEqual(properties["iris.serverPath"].default, "");
     assert.strictEqual(properties["purescriptAnalyzer.serverPath"].default, "");
   });
 
@@ -25,11 +32,11 @@ describe("manifest", () => {
 
     assert.match(
       properties["purescriptAnalyzer.serverPath"].deprecationMessage,
-      /alexandrite\.serverPath/,
+      /iris\.serverPath/,
     );
     assert.match(
       properties["purescriptAnalyzer.sourceCommand"].deprecationMessage,
-      /alexandrite\.sourceCommand/,
+      /iris\.sourceCommand/,
     );
   });
 });

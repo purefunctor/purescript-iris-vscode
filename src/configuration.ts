@@ -1,11 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-export const defaultServerCommands = [
-  "alexandrite",
-  "purescript-alexandrite",
-  "purescript-analyzer",
-];
+export const defaultServerCommands = ["iris", "purescript-analyzer"];
 
 export interface ExtensionSettings {
   serverPath?: string;
@@ -13,7 +9,7 @@ export interface ExtensionSettings {
 }
 
 export interface ConfigurationInput {
-  alexandrite?: ExtensionSettings;
+  iris?: ExtensionSettings;
   purescriptAnalyzer?: ExtensionSettings;
   pathValue?: string;
   platform?: NodeJS.Platform;
@@ -39,7 +35,7 @@ export function resolveConfiguration(input: ConfigurationInput) {
 
 export function resolveServerPath(input: ConfigurationInput) {
   return (
-    trimmed(input.alexandrite?.serverPath) ||
+    trimmed(input.iris?.serverPath) ||
     trimmed(input.purescriptAnalyzer?.serverPath) ||
     findFirstExecutable(
       defaultServerCommands,
@@ -56,7 +52,7 @@ export function resolveServerPath(input: ConfigurationInput) {
 
 export function resolveSourceCommand(input: ConfigurationInput) {
   return (
-    trimmed(input.alexandrite?.sourceCommand) ||
+    trimmed(input.iris?.sourceCommand) ||
     trimmed(input.purescriptAnalyzer?.sourceCommand)
   );
 }

@@ -1,13 +1,13 @@
 {
   "name": "purescript-analyzer",
-  "displayName": "purescript-alexandrite",
-  "description": "purescript-alexandrite integration for Visual Studio Code",
+  "displayName": "purescript-iris",
+  "description": "purescript-iris integration for Visual Studio Code",
   "author": "Justin Garcia",
   "license": "BSD-3-Clause",
   "version": "0.0.5",
   "repository": {
     "type": "git",
-    "url": "https://github.com/purefunctor/purescript-alexandrite-vscode"
+    "url": "https://github.com/purefunctor/purescript-iris-vscode"
   },
   "publisher": "purefunctor",
   "categories": [],
@@ -51,14 +51,14 @@
   ],
   "contributes": {
     "configuration": {
-      "title": "Alexandrite",
+      "title": "Iris",
       "properties": {
-        "alexandrite.serverPath": {
+        "iris.serverPath": {
           "type": "string",
           "default": "",
-          "description": "Path or command used to start the Alexandrite language server. If unset, Alexandrite searches PATH for alexandrite, purescript-alexandrite, then purescript-analyzer."
+          "description": "Path or command used to start the Iris language server. If unset, Iris searches PATH for iris, then purescript-analyzer."
         },
-        "alexandrite.sourceCommand": {
+        "iris.sourceCommand": {
           "type": "string",
           "default": "",
           "description": "Path or command used to obtain source files. This disables spago.lock integration."
@@ -66,14 +66,14 @@
         "purescriptAnalyzer.serverPath": {
           "type": "string",
           "default": "",
-          "description": "Deprecated. Use alexandrite.serverPath instead.",
-          "deprecationMessage": "Use alexandrite.serverPath instead."
+          "description": "Deprecated. Use iris.serverPath instead.",
+          "deprecationMessage": "Use iris.serverPath instead."
         },
         "purescriptAnalyzer.sourceCommand": {
           "type": "string",
           "default": "",
-          "description": "Deprecated. Use alexandrite.sourceCommand instead.",
-          "deprecationMessage": "Use alexandrite.sourceCommand instead."
+          "description": "Deprecated. Use iris.sourceCommand instead.",
+          "deprecationMessage": "Use iris.sourceCommand instead."
         }
       }
     }

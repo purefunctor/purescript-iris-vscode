@@ -18,10 +18,10 @@ class FakeFileSystem {
 }
 
 describe("configuration", () => {
-  test("prefers Alexandrite settings over legacy settings", () => {
+  test("prefers Iris settings over legacy settings", () => {
     const config = resolveConfiguration({
-      alexandrite: {
-        serverPath: " /bin/alexandrite ",
+      iris: {
+        serverPath: " /bin/iris ",
         sourceCommand: " find src -name '*.purs' ",
       },
       purescriptAnalyzer: {
@@ -31,13 +31,13 @@ describe("configuration", () => {
       pathValue: "",
     });
 
-    assert.strictEqual(config.serverPath, "/bin/alexandrite");
+    assert.strictEqual(config.serverPath, "/bin/iris");
     assert.strictEqual(config.sourceCommand, "find src -name '*.purs'");
   });
 
-  test("uses legacy settings when Alexandrite settings are empty", () => {
+  test("uses legacy settings when Iris settings are empty", () => {
     const config = resolveConfiguration({
-      alexandrite: {
+      iris: {
         serverPath: " ",
         sourceCommand: "",
       },
@@ -54,8 +54,7 @@ describe("configuration", () => {
 
   test("searches server commands in the expected order", () => {
     assert.deepStrictEqual(defaultServerCommands, [
-      "alexandrite",
-      "purescript-alexandrite",
+      "iris",
       "purescript-analyzer",
     ]);
   });
@@ -66,31 +65,35 @@ describe("configuration", () => {
     const pathValue = [firstDirectory, secondDirectory].join(":");
     const fileSystem = new FakeFileSystem([
       path.join(firstDirectory, "purescript-analyzer"),
-      path.join(secondDirectory, "alexandrite"),
+      path.join(secondDirectory, "iris"),
     ]);
 
-    const executablePath = findFirstExecutable(defaultServerCommands, pathValue, {
-      fileSystem,
-      platform: "darwin",
-    });
+    const executablePath = findFirstExecutable(
+      defaultServerCommands,
+      pathValue,
+      {
+        fileSystem,
+        platform: "darwin",
+      },
+    );
 
-    assert.strictEqual(executablePath, path.join(secondDirectory, "alexandrite"));
+    assert.strictEqual(executablePath, path.join(secondDirectory, "iris"));
   });
 
-  test("falls back to alexandrite when no server command is found", () => {
+  test("falls back to iris when no server command is found", () => {
     const config = resolveConfiguration({
       pathValue: "",
       fileSystem: new FakeFileSystem([]),
     });
 
-    assert.strictEqual(config.serverPath, "alexandrite");
+    assert.strictEqual(config.serverPath, "iris");
     assert.strictEqual(config.sourceCommand, undefined);
   });
 
   test("uses PATHEXT when searching for Windows executables", () => {
     const directory = "C:\\Tools";
-    const executablePath = path.join(directory, "alexandrite.EXE");
-    const result = findExecutable("alexandrite", directory, {
+    const executablePath = path.join(directory, "iris.EXE");
+    const result = findExecutable("iris", directory, {
       fileSystem: new FakeFileSystem([executablePath]),
       pathExtensions: ".EXE;.CMD",
       platform: "win32",

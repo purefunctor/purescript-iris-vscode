@@ -1,3 +1,3 @@
-# Alexandrite for Visual Studio Code
+# Iris for Visual Studio Code
 
-Alexandrite integration for Visual Studio Code.
+[Iris](https://github.com/purefunctor/purescript-iris) integration for Visual Studio Code.

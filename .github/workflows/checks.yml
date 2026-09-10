@@ -65,25 +65,25 @@ jobs:
             os: ubuntu-24.04
             version_label: minimum
             vscode_version: ${{ needs.node.outputs.vscode_version }}
-            alexandrite-executable: purescript-alexandrite
+            iris-executable: iris
             test-command: xvfb-run -a npm run test:integration
           - platform: macOS
             os: macos-14
             version_label: minimum
             vscode_version: ${{ needs.node.outputs.vscode_version }}
-            alexandrite-executable: purescript-alexandrite
+            iris-executable: iris
             test-command: npm run test:integration
           - platform: Windows
             os: windows-2022
             version_label: minimum
             vscode_version: ${{ needs.node.outputs.vscode_version }}
-            alexandrite-executable: purescript-alexandrite.exe
+            iris-executable: iris.exe
             test-command: npm run test:integration
           - platform: Linux
             os: ubuntu-24.04
             version_label: stable
             vscode_version: stable
-            alexandrite-executable: purescript-alexandrite
+            iris-executable: iris
             test-command: xvfb-run -a npm run test:integration
 
     env:
@@ -103,22 +103,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Alexandrite
+      - name: Install Iris
         if: runner.os != 'Windows'
         env:
-          ALEXANDRITE_INSTALL_DIR: ${{ runner.temp }}/alexandrite/bin
+          IRIS_INSTALL_DIR: ${{ runner.temp }}/iris/bin
         run: >-
           curl --proto '=https' --tlsv1.2 -LsSf
-          https://raw.githubusercontent.com/purefunctor/purescript-alexandrite/main/install.sh
+          https://raw.githubusercontent.com/purefunctor/purescript-iris/main/install.sh
           | sh
 
-      - name: Install Alexandrite on Windows
+      - name: Install Iris on Windows
         if: runner.os == 'Windows'
         shell: pwsh
         env:
-          ALEXANDRITE_INSTALL_DIR: ${{ runner.temp }}/alexandrite/bin
+          IRIS_INSTALL_DIR: ${{ runner.temp }}/iris/bin
         run: >-
-          irm https://raw.githubusercontent.com/purefunctor/purescript-alexandrite/main/install.ps1
+          irm https://raw.githubusercontent.com/purefunctor/purescript-iris/main/install.ps1
           | iex
 
       - name: Cache minimum VS Code
@@ -130,7 +130,7 @@ jobs:
 
       - name: Run integration tests
         env:
-          ALEXANDRITE_PATH: ${{ runner.temp }}/alexandrite/bin/${{ matrix.alexandrite-executable }}
+          IRIS_PATH: ${{ runner.temp }}/iris/bin/${{ matrix.iris-executable }}
         run: ${{ matrix.test-command }}
 
   package:
@@ -152,4 +152,4 @@ jobs:
         run: npm ci
 
       - name: Check extension can be packaged
-        run: npm run package -- --out /tmp/alexandrite-check.vsix
+        run: npm run package -- --out /tmp/iris-check.vsix

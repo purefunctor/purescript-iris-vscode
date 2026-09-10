@@ -2,10 +2,10 @@
 set -euo pipefail
 
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-alexandrite_executable="$repository_root/../repos/purescript-alexandrite/target/debug/purescript-alexandrite"
+iris_executable="$repository_root/../repos/purescript-iris/target/debug/iris"
 
-if [[ ! -x "$alexandrite_executable" ]]; then
-  echo "The linked Alexandrite executable is missing; run .agents/setup to rebuild it." >&2
+if [[ ! -x "$iris_executable" ]]; then
+  echo "The linked Iris executable is missing; run .agents/setup to rebuild it." >&2
 fi
 
 echo "Orb resume checks complete."

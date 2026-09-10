@@ -21,19 +21,19 @@ async function main() {
     extensionDevelopmentPath,
     ".vscode-test",
     "workspaces",
-    "alexandrite",
+    "iris",
   );
   const userDataPath = path.resolve(
     extensionDevelopmentPath,
     ".vscode-test",
     "user-data",
-    "alexandrite",
+    "iris",
   );
   const extensionsPath = path.resolve(
     extensionDevelopmentPath,
     ".vscode-test",
     "extensions",
-    "alexandrite",
+    "iris",
   );
   const fixturesPath = path.resolve(
     extensionDevelopmentPath,
@@ -41,9 +41,9 @@ async function main() {
     "integration",
     "fixtures",
   );
-  const alexandritePath = requireExecutablePath("ALEXANDRITE_PATH");
+  const irisPath = requireExecutablePath("IRIS_PATH");
 
-  prepareWorkspace(workspacePath, fixturesPath, alexandritePath);
+  prepareWorkspace(workspacePath, fixturesPath, irisPath);
   fs.rmSync(userDataPath, { recursive: true, force: true });
   fs.rmSync(extensionsPath, { recursive: true, force: true });
 
@@ -71,7 +71,7 @@ async function main() {
       "--skip-welcome",
     ],
     extensionTestsEnv: {
-      ALEXANDRITE_PATH: alexandritePath,
+      IRIS_PATH: irisPath,
     },
   });
 }
@@ -104,7 +104,9 @@ function installExtension(
   );
 
   if (result.status !== 0) {
-    throw new Error(`Failed to install VS Code extension dependency: ${extensionId}`);
+    throw new Error(
+      `Failed to install VS Code extension dependency: ${extensionId}`,
+    );
   }
 }
 
@@ -134,7 +136,7 @@ function requireExecutablePath(environmentVariable: string) {
 function prepareWorkspace(
   workspacePath: string,
   fixturesPath: string,
-  alexandritePath: string,
+  irisPath: string,
 ) {
   const vscodeDirectory = path.join(workspacePath, ".vscode");
   const srcDirectory = path.join(workspacePath, "src");
@@ -161,8 +163,8 @@ function prepareWorkspace(
     path.join(vscodeDirectory, "settings.json"),
     JSON.stringify(
       {
-        "alexandrite.serverPath": alexandritePath,
-        "alexandrite.sourceCommand": `${process.execPath} ${sourceFilesScript}`,
+        "iris.serverPath": irisPath,
+        "iris.sourceCommand": `${process.execPath} ${sourceFilesScript}`,
       },
       null,
       2,
