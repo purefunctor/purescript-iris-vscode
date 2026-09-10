@@ -3,9 +3,14 @@ import * as path from "path";
 
 export const defaultServerCommands = ["iris", "purescript-analyzer"];
 
+export interface SourceCommand {
+  program: string;
+  arguments?: string[];
+}
+
 export interface ExtensionSettings {
   serverPath?: string;
-  sourceCommand?: string;
+  sourceCommand?: SourceCommand | null;
 }
 
 export interface ConfigurationInput {
@@ -23,10 +28,12 @@ export interface ExecutableFileSystem {
 
 export interface ResolvedConfiguration {
   serverPath: string;
-  sourceCommand?: string;
+  sourceCommand?: SourceCommand;
 }
 
-export function resolveConfiguration(input: ConfigurationInput) {
+export function resolveConfiguration(
+  input: ConfigurationInput,
+): ResolvedConfiguration {
   return {
     serverPath: resolveServerPath(input),
     sourceCommand: resolveSourceCommand(input),
@@ -52,8 +59,9 @@ export function resolveServerPath(input: ConfigurationInput) {
 
 export function resolveSourceCommand(input: ConfigurationInput) {
   return (
-    trimmed(input.iris?.sourceCommand) ||
-    trimmed(input.purescriptAnalyzer?.sourceCommand)
+    input.iris?.sourceCommand ??
+    input.purescriptAnalyzer?.sourceCommand ??
+    undefined
   );
 }
 

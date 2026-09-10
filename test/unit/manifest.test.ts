@@ -27,6 +27,23 @@ describe("manifest", () => {
     assert.strictEqual(properties["purescriptAnalyzer.serverPath"].default, "");
   });
 
+  test("describes structured source commands without overriding Spago defaults", () => {
+    const properties = packageJson.contributes.configuration.properties;
+
+    for (const setting of [
+      properties["iris.sourceCommand"],
+      properties["purescriptAnalyzer.sourceCommand"],
+    ]) {
+      assert.deepStrictEqual(setting.type, ["object", "null"]);
+      assert.strictEqual(setting.default, null);
+      assert.deepStrictEqual(setting.required, ["program"]);
+      assert.strictEqual(setting.additionalProperties, false);
+      assert.strictEqual(setting.properties.program.type, "string");
+      assert.strictEqual(setting.properties.arguments.type, "array");
+      assert.strictEqual(setting.properties.arguments.items.type, "string");
+    }
+  });
+
   test("marks legacy settings as deprecated", () => {
     const properties = packageJson.contributes.configuration.properties;
 

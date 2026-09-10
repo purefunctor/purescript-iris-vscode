@@ -59,9 +59,31 @@
           "description": "Path or command used to start the Iris language server. If unset, Iris searches PATH for iris, then purescript-analyzer."
         },
         "iris.sourceCommand": {
-          "type": "string",
-          "default": "",
-          "description": "Path or command used to obtain source files. This disables spago.lock integration."
+          "type": [
+            "object",
+            "null"
+          ],
+          "default": null,
+          "description": "Executable and arguments used to obtain source files, without shell parsing. If unset, Iris uses spago.lock integration. Reload the window after changing this setting.",
+          "required": [
+            "program"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "program": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Executable name or path."
+            },
+            "arguments": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "description": "Arguments passed unchanged to the executable."
+            }
+          }
         },
         "purescriptAnalyzer.serverPath": {
           "type": "string",
@@ -70,8 +92,28 @@
           "deprecationMessage": "Use iris.serverPath instead."
         },
         "purescriptAnalyzer.sourceCommand": {
-          "type": "string",
-          "default": "",
+          "type": [
+            "object",
+            "null"
+          ],
+          "default": null,
+          "required": [
+            "program"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "program": {
+              "type": "string",
+              "minLength": 1
+            },
+            "arguments": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
           "description": "Deprecated. Use iris.sourceCommand instead.",
           "deprecationMessage": "Use iris.sourceCommand instead."
         }

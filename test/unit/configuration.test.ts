@@ -22,34 +22,52 @@ describe("configuration", () => {
     const config = resolveConfiguration({
       iris: {
         serverPath: " /bin/iris ",
-        sourceCommand: " find src -name '*.purs' ",
+        sourceCommand: {
+          program: "C:\\Program Files\\node.exe",
+          arguments: ["source files.js", ' quoted "value" ', ""],
+        },
       },
       purescriptAnalyzer: {
         serverPath: "/bin/purescript-analyzer",
-        sourceCommand: "legacy-source-command",
+        sourceCommand: { program: "legacy-source-command" },
       },
       pathValue: "",
     });
 
     assert.strictEqual(config.serverPath, "/bin/iris");
-    assert.strictEqual(config.sourceCommand, "find src -name '*.purs'");
+    assert.deepStrictEqual(config.sourceCommand, {
+      program: "C:\\Program Files\\node.exe",
+      arguments: ["source files.js", ' quoted "value" ', ""],
+    });
   });
 
   test("uses legacy settings when Iris settings are empty", () => {
     const config = resolveConfiguration({
       iris: {
         serverPath: " ",
-        sourceCommand: "",
+        sourceCommand: null,
       },
       purescriptAnalyzer: {
         serverPath: " /bin/purescript-analyzer ",
-        sourceCommand: " legacy-source-command ",
+        sourceCommand: { program: "legacy-source-command" },
       },
       pathValue: "",
     });
 
     assert.strictEqual(config.serverPath, "/bin/purescript-analyzer");
-    assert.strictEqual(config.sourceCommand, "legacy-source-command");
+    assert.deepStrictEqual(config.sourceCommand, {
+      program: "legacy-source-command",
+    });
+  });
+
+  test("uses Spago source discovery when both source commands are unset", () => {
+    const config = resolveConfiguration({
+      iris: { sourceCommand: null },
+      purescriptAnalyzer: { sourceCommand: null },
+      pathValue: "",
+    });
+
+    assert.strictEqual(config.sourceCommand, undefined);
   });
 
   test("searches server commands in the expected order", () => {

@@ -146,7 +146,7 @@ function prepareWorkspace(
     recursive: true,
   });
 
-  const sourceFilesScript = path.join(workspacePath, "source-files.js");
+  const sourceFilesScript = path.join(workspacePath, "source files.js");
   fs.writeFileSync(
     sourceFilesScript,
     [
@@ -164,7 +164,10 @@ function prepareWorkspace(
     JSON.stringify(
       {
         "iris.serverPath": irisPath,
-        "iris.sourceCommand": `${process.execPath} ${sourceFilesScript}`,
+        "iris.sourceCommand": {
+          program: process.execPath,
+          arguments: [sourceFilesScript],
+        },
       },
       null,
       2,
