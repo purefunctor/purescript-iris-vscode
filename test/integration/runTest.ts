@@ -70,9 +70,6 @@ async function main() {
       "--skip-release-notes",
       "--skip-welcome",
     ],
-    extensionTestsEnv: {
-      IRIS_PATH: irisPath,
-    },
   });
 }
 

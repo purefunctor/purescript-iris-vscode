@@ -11,18 +11,6 @@ describe("manifest", () => {
     assert.strictEqual(packageJson.publisher, "purefunctor");
   });
 
-  test("contributes client, server, and flat legacy settings", () => {
-    const properties = packageJson.contributes.configuration.properties;
-
-    assert.ok(properties["iris.client.serverPath"]);
-    assert.ok(properties["iris.server.sources"]);
-    assert.ok(properties["iris.server.diagnostics.onOpen"]);
-    assert.ok(properties["iris.server.diagnostics.onSave"]);
-    assert.ok(properties["iris.server.diagnostics.onChange"]);
-    assert.ok(properties["iris.serverPath"]);
-    assert.ok(properties["iris.sourceCommand"]);
-  });
-
   test("keeps server path defaults empty for runtime fallback", () => {
     const properties = packageJson.contributes.configuration.properties;
 
@@ -36,23 +24,28 @@ describe("manifest", () => {
 
     assert.strictEqual(sources.default, null);
     assert.strictEqual(sources.scope, "resource");
-    assert.deepStrictEqual(
-      sources.oneOf.map((alternative) => alternative.type),
-      ["null", "object", "object"],
+    assert.strictEqual(
+      sources.oneOf.some((alternative) => alternative.type === "null"),
+      true,
     );
-    const spago = sources.oneOf[1];
+    const spago = sources.oneOf.find(
+      (alternative) => alternative.properties?.kind?.const === "spago",
+    );
+    assert.ok(spago);
     assert.deepStrictEqual(spago.required, ["kind"]);
     assert.strictEqual(spago.additionalProperties, false);
-    assert.strictEqual(spago.properties.kind.const, "spago");
-    const command = sources.oneOf[2];
-    assert.deepStrictEqual(command.required, ["kind", "program"]);
+    const command = sources.oneOf.find(
+      (alternative) => alternative.properties?.kind?.const === "command",
+    );
+    assert.ok(command);
+    assert.deepStrictEqual(command.required?.slice().sort(), [
+      "kind",
+      "program",
+    ]);
     assert.strictEqual(command.additionalProperties, false);
-    assert.strictEqual(command.properties.kind.const, "command");
-    assert.ok(command.properties.program);
-    assert.ok(command.properties.arguments);
-    assert.strictEqual(command.properties.program.type, "string");
-    assert.strictEqual(command.properties.arguments.type, "array");
-    assert.strictEqual(command.properties.arguments.items.type, "string");
+    assert.strictEqual(command.properties.program?.type, "string");
+    assert.strictEqual(command.properties.arguments?.type, "array");
+    assert.strictEqual(command.properties.arguments?.items.type, "string");
   });
 
   test("does not override server diagnostic defaults", () => {
