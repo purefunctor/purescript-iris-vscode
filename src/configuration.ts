@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-export const defaultServerCommands = ["iris", "purescript-analyzer"];
+export const defaultServerCommand = "iris";
 
 export interface SourceCommand {
   program: string;
@@ -49,8 +49,8 @@ export function resolveServerPath(input: ConfigurationInput) {
     trimmed(input.client?.serverPath) ||
     trimmed(input.iris?.serverPath) ||
     trimmed(input.purescriptAnalyzer?.serverPath) ||
-    findFirstExecutable(
-      defaultServerCommands,
+    findExecutable(
+      defaultServerCommand,
       input.pathValue ?? process.env.PATH ?? "",
       {
         fileSystem: input.fileSystem,
@@ -58,7 +58,7 @@ export function resolveServerPath(input: ConfigurationInput) {
         platform: input.platform,
       },
     ) ||
-    defaultServerCommands[0]
+    defaultServerCommand
   );
 }
 
@@ -74,20 +74,6 @@ export interface FindExecutableOptions {
   platform?: NodeJS.Platform;
   pathExtensions?: string;
   fileSystem?: ExecutableFileSystem;
-}
-
-export function findFirstExecutable(
-  commands: readonly string[],
-  pathValue: string,
-  options: FindExecutableOptions = {},
-) {
-  for (const command of commands) {
-    const executablePath = findExecutable(command, pathValue, options);
-    if (executablePath) {
-      return executablePath;
-    }
-  }
-  return undefined;
 }
 
 export function findExecutable(

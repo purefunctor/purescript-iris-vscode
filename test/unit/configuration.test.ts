@@ -3,9 +3,8 @@ import * as path from "path";
 import { describe, test } from "vitest";
 
 import {
-  defaultServerCommands,
+  defaultServerCommand,
   findExecutable,
-  findFirstExecutable,
   resolveConfiguration,
 } from "../../src/configuration";
 
@@ -93,30 +92,20 @@ describe("configuration", () => {
     assert.strictEqual(config.sourceCommand, undefined);
   });
 
-  test("searches server commands in the expected order", () => {
-    assert.deepStrictEqual(defaultServerCommands, [
-      "iris",
-      "purescript-analyzer",
-    ]);
+  test("uses iris as the default server command", () => {
+    assert.strictEqual(defaultServerCommand, "iris");
   });
 
-  test("finds the first executable server command on PATH", () => {
+  test("finds iris on PATH", () => {
     const firstDirectory = path.join("tmp", "first");
     const secondDirectory = path.join("tmp", "second");
     const pathValue = [firstDirectory, secondDirectory].join(":");
-    const fileSystem = new FakeFileSystem([
-      path.join(firstDirectory, "purescript-analyzer"),
-      path.join(secondDirectory, "iris"),
-    ]);
+    const fileSystem = new FakeFileSystem([path.join(secondDirectory, "iris")]);
 
-    const executablePath = findFirstExecutable(
-      defaultServerCommands,
-      pathValue,
-      {
-        fileSystem,
-        platform: "darwin",
-      },
-    );
+    const executablePath = findExecutable(defaultServerCommand, pathValue, {
+      fileSystem,
+      platform: "darwin",
+    });
 
     assert.strictEqual(executablePath, path.join(secondDirectory, "iris"));
   });
