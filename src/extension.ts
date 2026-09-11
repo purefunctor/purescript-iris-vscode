@@ -14,7 +14,6 @@ let client: LanguageClient;
 export function activate(context: ExtensionContext) {
   const clientConfig = workspace.getConfiguration("iris.client");
   const irisConfig = workspace.getConfiguration("iris");
-  const legacyConfig = workspace.getConfiguration("purescriptAnalyzer");
   const resolvedConfig = resolveConfiguration({
     client: {
       serverPath: clientConfig.get<string>("serverPath"),
@@ -22,10 +21,6 @@ export function activate(context: ExtensionContext) {
     iris: {
       serverPath: irisConfig.get<string>("serverPath"),
       sourceCommand: irisConfig.get<SourceCommand | null>("sourceCommand"),
-    },
-    purescriptAnalyzer: {
-      serverPath: legacyConfig.get<string>("serverPath"),
-      sourceCommand: legacyConfig.get<SourceCommand | null>("sourceCommand"),
     },
   });
 

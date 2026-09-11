@@ -24,8 +24,8 @@ Omit `arguments` when the program takes no arguments. Set `iris.server.sources` 
 or remove it to inherit startup source discovery, which defaults to Spago. Server
 settings apply without reloading the VS Code window.
 
-The deprecated `iris.sourceCommand` and `purescriptAnalyzer.sourceCommand` settings
-continue to configure startup source discovery during migration.
+The deprecated `iris.sourceCommand` setting continues to configure startup source
+discovery during migration.
 
 ## Settings
 

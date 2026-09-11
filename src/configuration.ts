@@ -19,7 +19,6 @@ export interface LegacySettings extends ClientSettings {
 export interface ConfigurationInput {
   client?: ClientSettings;
   iris?: LegacySettings;
-  purescriptAnalyzer?: LegacySettings;
   pathValue?: string;
   platform?: NodeJS.Platform;
   pathExtensions?: string;
@@ -48,7 +47,6 @@ export function resolveServerPath(input: ConfigurationInput) {
   return (
     trimmed(input.client?.serverPath) ||
     trimmed(input.iris?.serverPath) ||
-    trimmed(input.purescriptAnalyzer?.serverPath) ||
     findExecutable(
       defaultServerCommand,
       input.pathValue ?? process.env.PATH ?? "",
@@ -63,11 +61,7 @@ export function resolveServerPath(input: ConfigurationInput) {
 }
 
 export function resolveSourceCommand(input: ConfigurationInput) {
-  return (
-    input.iris?.sourceCommand ??
-    input.purescriptAnalyzer?.sourceCommand ??
-    undefined
-  );
+  return input.iris?.sourceCommand ?? undefined;
 }
 
 export interface FindExecutableOptions {

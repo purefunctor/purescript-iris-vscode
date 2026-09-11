@@ -169,38 +169,6 @@
               "description": "Arguments passed unchanged to the executable."
             }
           }
-        },
-        "purescriptAnalyzer.serverPath": {
-          "type": "string",
-          "default": "",
-          "description": "Deprecated. Use iris.client.serverPath instead.",
-          "deprecationMessage": "Use iris.client.serverPath instead."
-        },
-        "purescriptAnalyzer.sourceCommand": {
-          "type": [
-            "object",
-            "null"
-          ],
-          "default": null,
-          "required": [
-            "program"
-          ],
-          "additionalProperties": false,
-          "properties": {
-            "program": {
-              "type": "string",
-              "minLength": 1
-            },
-            "arguments": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "default": []
-            }
-          },
-          "description": "Deprecated. Use iris.server.sources instead.",
-          "deprecationMessage": "Use iris.server.sources instead."
         }
       }
     }

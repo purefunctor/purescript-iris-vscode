@@ -11,7 +11,7 @@ describe("manifest", () => {
     assert.strictEqual(packageJson.publisher, "purefunctor");
   });
 
-  test("contributes client, server, and legacy settings", () => {
+  test("contributes client, server, and flat legacy settings", () => {
     const properties = packageJson.contributes.configuration.properties;
 
     assert.ok(properties["iris.client.serverPath"]);
@@ -21,8 +21,6 @@ describe("manifest", () => {
     assert.ok(properties["iris.server.diagnostics.onChange"]);
     assert.ok(properties["iris.serverPath"]);
     assert.ok(properties["iris.sourceCommand"]);
-    assert.ok(properties["purescriptAnalyzer.serverPath"]);
-    assert.ok(properties["purescriptAnalyzer.sourceCommand"]);
   });
 
   test("keeps server path defaults empty for runtime fallback", () => {
@@ -30,7 +28,6 @@ describe("manifest", () => {
 
     assert.strictEqual(properties["iris.client.serverPath"].default, "");
     assert.strictEqual(properties["iris.serverPath"].default, "");
-    assert.strictEqual(properties["purescriptAnalyzer.serverPath"].default, "");
   });
 
   test("describes the server source-discovery schema without overriding defaults", () => {
@@ -69,21 +66,17 @@ describe("manifest", () => {
     }
   });
 
-  test("keeps legacy source commands structured", () => {
+  test("keeps the legacy source command structured", () => {
     const properties = packageJson.contributes.configuration.properties;
+    const setting = properties["iris.sourceCommand"];
 
-    for (const setting of [
-      properties["iris.sourceCommand"],
-      properties["purescriptAnalyzer.sourceCommand"],
-    ]) {
-      assert.deepStrictEqual(setting.type, ["object", "null"]);
-      assert.strictEqual(setting.default, null);
-      assert.deepStrictEqual(setting.required, ["program"]);
-      assert.strictEqual(setting.additionalProperties, false);
-      assert.strictEqual(setting.properties.program.type, "string");
-      assert.strictEqual(setting.properties.arguments.type, "array");
-      assert.strictEqual(setting.properties.arguments.items.type, "string");
-    }
+    assert.deepStrictEqual(setting.type, ["object", "null"]);
+    assert.strictEqual(setting.default, null);
+    assert.deepStrictEqual(setting.required, ["program"]);
+    assert.strictEqual(setting.additionalProperties, false);
+    assert.strictEqual(setting.properties.program.type, "string");
+    assert.strictEqual(setting.properties.arguments.type, "array");
+    assert.strictEqual(setting.properties.arguments.items.type, "string");
   });
 
   test("marks legacy settings as deprecated", () => {
@@ -95,14 +88,6 @@ describe("manifest", () => {
     );
     assert.match(
       properties["iris.sourceCommand"].deprecationMessage,
-      /iris\.server\.sources/,
-    );
-    assert.match(
-      properties["purescriptAnalyzer.serverPath"].deprecationMessage,
-      /iris\.client\.serverPath/,
-    );
-    assert.match(
-      properties["purescriptAnalyzer.sourceCommand"].deprecationMessage,
       /iris\.server\.sources/,
     );
   });

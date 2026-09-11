@@ -29,10 +29,6 @@ describe("configuration", () => {
           arguments: ["source files.js", ' quoted "value" ', ""],
         },
       },
-      purescriptAnalyzer: {
-        serverPath: "/bin/purescript-analyzer",
-        sourceCommand: { program: "legacy-source-command" },
-      },
       pathValue: "",
     });
 
@@ -52,10 +48,6 @@ describe("configuration", () => {
         serverPath: " /bin/iris ",
         sourceCommand: { program: "iris-source-command" },
       },
-      purescriptAnalyzer: {
-        serverPath: " /bin/purescript-analyzer ",
-        sourceCommand: { program: "legacy-source-command" },
-      },
       pathValue: "",
     });
 
@@ -65,27 +57,9 @@ describe("configuration", () => {
     });
   });
 
-  test("uses purescript-analyzer settings when Iris settings are empty", () => {
-    const config = resolveConfiguration({
-      client: { serverPath: " " },
-      iris: { serverPath: " ", sourceCommand: null },
-      purescriptAnalyzer: {
-        serverPath: " /bin/purescript-analyzer ",
-        sourceCommand: { program: "legacy-source-command" },
-      },
-      pathValue: "",
-    });
-
-    assert.strictEqual(config.serverPath, "/bin/purescript-analyzer");
-    assert.deepStrictEqual(config.sourceCommand, {
-      program: "legacy-source-command",
-    });
-  });
-
-  test("uses Spago source discovery when both source commands are unset", () => {
+  test("uses Spago source discovery when the source command is unset", () => {
     const config = resolveConfiguration({
       iris: { sourceCommand: null },
-      purescriptAnalyzer: { sourceCommand: null },
       pathValue: "",
     });
 
