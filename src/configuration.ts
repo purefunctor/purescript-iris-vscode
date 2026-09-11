@@ -8,14 +8,18 @@ export interface SourceCommand {
   arguments?: string[];
 }
 
-export interface ExtensionSettings {
+export interface ClientSettings {
   serverPath?: string;
+}
+
+export interface LegacySettings extends ClientSettings {
   sourceCommand?: SourceCommand | null;
 }
 
 export interface ConfigurationInput {
-  iris?: ExtensionSettings;
-  purescriptAnalyzer?: ExtensionSettings;
+  client?: ClientSettings;
+  iris?: LegacySettings;
+  purescriptAnalyzer?: LegacySettings;
   pathValue?: string;
   platform?: NodeJS.Platform;
   pathExtensions?: string;
@@ -42,6 +46,7 @@ export function resolveConfiguration(
 
 export function resolveServerPath(input: ConfigurationInput) {
   return (
+    trimmed(input.client?.serverPath) ||
     trimmed(input.iris?.serverPath) ||
     trimmed(input.purescriptAnalyzer?.serverPath) ||
     findFirstExecutable(

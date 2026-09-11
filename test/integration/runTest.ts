@@ -163,8 +163,9 @@ function prepareWorkspace(
     path.join(vscodeDirectory, "settings.json"),
     JSON.stringify(
       {
-        "iris.serverPath": irisPath,
-        "iris.sourceCommand": {
+        "iris.client.serverPath": irisPath,
+        "iris.server.sources": {
+          kind: "command",
           program: process.execPath,
           arguments: [sourceFilesScript],
         },

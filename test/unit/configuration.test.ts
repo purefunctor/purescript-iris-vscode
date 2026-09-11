@@ -18,10 +18,13 @@ class FakeFileSystem {
 }
 
 describe("configuration", () => {
-  test("prefers Iris settings over legacy settings", () => {
+  test("prefers client settings over legacy settings", () => {
     const config = resolveConfiguration({
-      iris: {
+      client: {
         serverPath: " /bin/iris ",
+      },
+      iris: {
+        serverPath: "/bin/flat-iris",
         sourceCommand: {
           program: "C:\\Program Files\\node.exe",
           arguments: ["source files.js", ' quoted "value" ', ""],
@@ -41,12 +44,32 @@ describe("configuration", () => {
     });
   });
 
-  test("uses legacy settings when Iris settings are empty", () => {
+  test("uses flat Iris settings when client settings are empty", () => {
     const config = resolveConfiguration({
-      iris: {
+      client: {
         serverPath: " ",
-        sourceCommand: null,
       },
+      iris: {
+        serverPath: " /bin/iris ",
+        sourceCommand: { program: "iris-source-command" },
+      },
+      purescriptAnalyzer: {
+        serverPath: " /bin/purescript-analyzer ",
+        sourceCommand: { program: "legacy-source-command" },
+      },
+      pathValue: "",
+    });
+
+    assert.strictEqual(config.serverPath, "/bin/iris");
+    assert.deepStrictEqual(config.sourceCommand, {
+      program: "iris-source-command",
+    });
+  });
+
+  test("uses purescript-analyzer settings when Iris settings are empty", () => {
+    const config = resolveConfiguration({
+      client: { serverPath: " " },
+      iris: { serverPath: " ", sourceCommand: null },
       purescriptAnalyzer: {
         serverPath: " /bin/purescript-analyzer ",
         sourceCommand: { program: "legacy-source-command" },

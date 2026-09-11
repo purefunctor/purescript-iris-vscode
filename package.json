@@ -53,10 +53,94 @@
     "configuration": {
       "title": "Iris",
       "properties": {
-        "iris.serverPath": {
+        "iris.client.serverPath": {
           "type": "string",
           "default": "",
           "description": "Path or command used to start the Iris language server. If unset, Iris searches PATH for iris, then purescript-analyzer."
+        },
+        "iris.server.sources": {
+          "description": "How Iris discovers project sources. Changes apply to the running language server.",
+          "default": null,
+          "scope": "resource",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": [
+                "kind"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "spago"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "kind",
+                "program"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "command"
+                },
+                "program": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "[^\\u0009-\\u000D\\u0020\\u0085\\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000]",
+                  "description": "Executable name or path, passed unchanged without shell parsing."
+                },
+                "arguments": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": [],
+                  "description": "Arguments passed unchanged to the executable."
+                }
+              }
+            }
+          ]
+        },
+        "iris.server.diagnostics.onOpen": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "default": null,
+          "scope": "resource",
+          "description": "Publish diagnostics when a document opens. Iris defaults to true. Changes apply to the running language server."
+        },
+        "iris.server.diagnostics.onSave": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "default": null,
+          "scope": "resource",
+          "description": "Publish diagnostics when a document is saved. Iris defaults to true. Changes apply to the running language server."
+        },
+        "iris.server.diagnostics.onChange": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "default": null,
+          "scope": "resource",
+          "description": "Publish diagnostics when a document changes. Iris defaults to false. Changes apply to the running language server."
+        },
+        "iris.serverPath": {
+          "type": "string",
+          "default": "",
+          "description": "Deprecated. Use iris.client.serverPath instead.",
+          "deprecationMessage": "Use iris.client.serverPath instead."
         },
         "iris.sourceCommand": {
           "type": [
@@ -64,7 +148,8 @@
             "null"
           ],
           "default": null,
-          "description": "Executable and arguments used to obtain source files, without shell parsing. If unset, Iris uses spago.lock integration. Reload the window after changing this setting.",
+          "description": "Deprecated. Use iris.server.sources instead.",
+          "deprecationMessage": "Use iris.server.sources instead.",
           "required": [
             "program"
           ],
@@ -88,8 +173,8 @@
         "purescriptAnalyzer.serverPath": {
           "type": "string",
           "default": "",
-          "description": "Deprecated. Use iris.serverPath instead.",
-          "deprecationMessage": "Use iris.serverPath instead."
+          "description": "Deprecated. Use iris.client.serverPath instead.",
+          "deprecationMessage": "Use iris.client.serverPath instead."
         },
         "purescriptAnalyzer.sourceCommand": {
           "type": [
@@ -114,8 +199,8 @@
               "default": []
             }
           },
-          "description": "Deprecated. Use iris.sourceCommand instead.",
-          "deprecationMessage": "Use iris.sourceCommand instead."
+          "description": "Deprecated. Use iris.server.sources instead.",
+          "deprecationMessage": "Use iris.server.sources instead."
         }
       }
     }
