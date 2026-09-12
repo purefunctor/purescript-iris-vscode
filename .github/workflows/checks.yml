@@ -53,7 +53,7 @@ jobs:
         run: npm run test:unit
 
   integration:
-    name: Integration tests (${{ matrix.platform }}, VS Code ${{ matrix.version_label }})
+    name: Integration tests (${{ matrix.platform }}, VS Code ${{ matrix.version_label }}, Iris ${{ matrix.iris_channel }})
     runs-on: ${{ matrix.os }}
     needs: node
 
@@ -65,24 +65,35 @@ jobs:
             os: ubuntu-24.04
             version_label: minimum
             vscode_version: ${{ needs.node.outputs.vscode_version }}
+            iris_channel: stable
             iris-executable: iris
             test-command: xvfb-run -a npm run test:integration
           - platform: macOS
             os: macos-14
             version_label: minimum
             vscode_version: ${{ needs.node.outputs.vscode_version }}
+            iris_channel: stable
             iris-executable: iris
             test-command: npm run test:integration
           - platform: Windows
             os: windows-2022
             version_label: minimum
             vscode_version: ${{ needs.node.outputs.vscode_version }}
+            iris_channel: stable
             iris-executable: iris.exe
             test-command: npm run test:integration
           - platform: Linux
             os: ubuntu-24.04
             version_label: stable
             vscode_version: stable
+            iris_channel: stable
+            iris-executable: iris
+            test-command: xvfb-run -a npm run test:integration
+          - platform: Linux
+            os: ubuntu-24.04
+            version_label: stable
+            vscode_version: stable
+            iris_channel: canary
             iris-executable: iris
             test-command: xvfb-run -a npm run test:integration
 
@@ -103,6 +114,35 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Resolve newest Iris canary
+        if: matrix.iris_channel == 'canary'
+        shell: bash
+        run: |
+          iris_version="$({
+            gh api --paginate \
+              -H 'Accept: application/vnd.github+json' \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              'repos/purefunctor/purescript-iris/releases?per_page=100'
+          } | jq -sr '
+            add
+            | map(select(
+                .draft == false
+                and .prerelease == true
+                and (.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+-dev\\.[0-9a-f]{12}$"))
+              ))
+            | sort_by(.published_at)
+            | last
+            | .tag_name // empty
+          ')"
+
+          if [[ -z "$iris_version" ]]; then
+            echo 'No published non-draft Iris canary release matched v<package-semver>-dev.<12-hex-commit>.' >&2
+            exit 1
+          fi
+
+          echo "Using Iris canary $iris_version"
+          echo "IRIS_VERSION=$iris_version" >> "$GITHUB_ENV"
+
       - name: Install Iris
         if: runner.os != 'Windows'
         env:
@@ -120,6 +160,18 @@ jobs:
         run: >-
           irm https://raw.githubusercontent.com/purefunctor/purescript-iris/main/install.ps1
           | iex
+
+      - name: Verify Iris canary version
+        if: matrix.iris_channel == 'canary'
+        shell: bash
+        run: |
+          installed_version="$($RUNNER_TEMP/iris/bin/iris --version)"
+          expected_version="iris ${IRIS_VERSION#v}"
+          echo "Installed $installed_version"
+          if [[ "$installed_version" != "$expected_version" ]]; then
+            echo "Expected $expected_version, but installed $installed_version." >&2
+            exit 1
+          fi
 
       - name: Cache minimum VS Code
         if: matrix.version_label == 'minimum'
