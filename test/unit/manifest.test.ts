@@ -11,49 +11,77 @@ describe("manifest", () => {
     assert.strictEqual(packageJson.publisher, "purefunctor");
   });
 
-  test("contributes preferred and legacy settings", () => {
-    const properties = packageJson.contributes.configuration.properties;
-
-    assert.ok(properties["iris.serverPath"]);
-    assert.ok(properties["iris.sourceCommand"]);
-    assert.ok(properties["purescriptAnalyzer.serverPath"]);
-    assert.ok(properties["purescriptAnalyzer.sourceCommand"]);
-  });
-
   test("keeps server path defaults empty for runtime fallback", () => {
     const properties = packageJson.contributes.configuration.properties;
 
+    assert.strictEqual(properties["iris.client.serverPath"].default, "");
     assert.strictEqual(properties["iris.serverPath"].default, "");
-    assert.strictEqual(properties["purescriptAnalyzer.serverPath"].default, "");
   });
 
-  test("describes structured source commands without overriding Spago defaults", () => {
+  test("describes the server source-discovery schema without overriding defaults", () => {
+    const properties = packageJson.contributes.configuration.properties;
+    const sources = properties["iris.server.sources"];
+
+    assert.strictEqual(sources.default, null);
+    assert.strictEqual(sources.scope, "resource");
+    assert.strictEqual(
+      sources.oneOf.some((alternative) => alternative.type === "null"),
+      true,
+    );
+    const spago = sources.oneOf.find(
+      (alternative) => alternative.properties?.kind?.const === "spago",
+    );
+    assert.ok(spago);
+    assert.deepStrictEqual(spago.required, ["kind"]);
+    assert.strictEqual(spago.additionalProperties, false);
+    const command = sources.oneOf.find(
+      (alternative) => alternative.properties?.kind?.const === "command",
+    );
+    assert.ok(command);
+    assert.deepStrictEqual(command.required?.slice().sort(), [
+      "kind",
+      "program",
+    ]);
+    assert.strictEqual(command.additionalProperties, false);
+    assert.strictEqual(command.properties.program?.type, "string");
+    assert.strictEqual(command.properties.arguments?.type, "array");
+    assert.strictEqual(command.properties.arguments?.items.type, "string");
+  });
+
+  test("does not override server diagnostic defaults", () => {
     const properties = packageJson.contributes.configuration.properties;
 
-    for (const setting of [
-      properties["iris.sourceCommand"],
-      properties["purescriptAnalyzer.sourceCommand"],
-    ]) {
-      assert.deepStrictEqual(setting.type, ["object", "null"]);
+    for (const name of ["onOpen", "onSave", "onChange"] as const) {
+      const setting = properties[`iris.server.diagnostics.${name}`];
+      assert.deepStrictEqual(setting.type, ["boolean", "null"]);
       assert.strictEqual(setting.default, null);
-      assert.deepStrictEqual(setting.required, ["program"]);
-      assert.strictEqual(setting.additionalProperties, false);
-      assert.strictEqual(setting.properties.program.type, "string");
-      assert.strictEqual(setting.properties.arguments.type, "array");
-      assert.strictEqual(setting.properties.arguments.items.type, "string");
+      assert.strictEqual(setting.scope, "resource");
     }
+  });
+
+  test("keeps the legacy source command structured", () => {
+    const properties = packageJson.contributes.configuration.properties;
+    const setting = properties["iris.sourceCommand"];
+
+    assert.deepStrictEqual(setting.type, ["object", "null"]);
+    assert.strictEqual(setting.default, null);
+    assert.deepStrictEqual(setting.required, ["program"]);
+    assert.strictEqual(setting.additionalProperties, false);
+    assert.strictEqual(setting.properties.program.type, "string");
+    assert.strictEqual(setting.properties.arguments.type, "array");
+    assert.strictEqual(setting.properties.arguments.items.type, "string");
   });
 
   test("marks legacy settings as deprecated", () => {
     const properties = packageJson.contributes.configuration.properties;
 
     assert.match(
-      properties["purescriptAnalyzer.serverPath"].deprecationMessage,
-      /iris\.serverPath/,
+      properties["iris.serverPath"].deprecationMessage,
+      /iris\.client\.serverPath/,
     );
     assert.match(
-      properties["purescriptAnalyzer.sourceCommand"].deprecationMessage,
-      /iris\.sourceCommand/,
+      properties["iris.sourceCommand"].deprecationMessage,
+      /iris\.server\.sources/,
     );
   });
 });

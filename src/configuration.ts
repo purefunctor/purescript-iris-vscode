@@ -1,21 +1,24 @@
 import * as fs from "fs";
 import * as path from "path";
 
-export const defaultServerCommands = ["iris", "purescript-analyzer"];
+export const defaultServerCommand = "iris";
 
 export interface SourceCommand {
   program: string;
   arguments?: string[];
 }
 
-export interface ExtensionSettings {
+export interface ClientSettings {
   serverPath?: string;
+}
+
+export interface LegacySettings extends ClientSettings {
   sourceCommand?: SourceCommand | null;
 }
 
 export interface ConfigurationInput {
-  iris?: ExtensionSettings;
-  purescriptAnalyzer?: ExtensionSettings;
+  client?: ClientSettings;
+  iris?: LegacySettings;
   pathValue?: string;
   platform?: NodeJS.Platform;
   pathExtensions?: string;
@@ -42,10 +45,10 @@ export function resolveConfiguration(
 
 export function resolveServerPath(input: ConfigurationInput) {
   return (
+    trimmed(input.client?.serverPath) ||
     trimmed(input.iris?.serverPath) ||
-    trimmed(input.purescriptAnalyzer?.serverPath) ||
-    findFirstExecutable(
-      defaultServerCommands,
+    findExecutable(
+      defaultServerCommand,
       input.pathValue ?? process.env.PATH ?? "",
       {
         fileSystem: input.fileSystem,
@@ -53,36 +56,18 @@ export function resolveServerPath(input: ConfigurationInput) {
         platform: input.platform,
       },
     ) ||
-    defaultServerCommands[0]
+    defaultServerCommand
   );
 }
 
 export function resolveSourceCommand(input: ConfigurationInput) {
-  return (
-    input.iris?.sourceCommand ??
-    input.purescriptAnalyzer?.sourceCommand ??
-    undefined
-  );
+  return input.iris?.sourceCommand ?? undefined;
 }
 
 export interface FindExecutableOptions {
   platform?: NodeJS.Platform;
   pathExtensions?: string;
   fileSystem?: ExecutableFileSystem;
-}
-
-export function findFirstExecutable(
-  commands: readonly string[],
-  pathValue: string,
-  options: FindExecutableOptions = {},
-) {
-  for (const command of commands) {
-    const executablePath = findExecutable(command, pathValue, options);
-    if (executablePath) {
-      return executablePath;
-    }
-  }
-  return undefined;
 }
 
 export function findExecutable(

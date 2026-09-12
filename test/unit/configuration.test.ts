@@ -2,12 +2,7 @@ import * as assert from "assert";
 import * as path from "path";
 import { describe, test } from "vitest";
 
-import {
-  defaultServerCommands,
-  findExecutable,
-  findFirstExecutable,
-  resolveConfiguration,
-} from "../../src/configuration";
+import { findExecutable, resolveConfiguration } from "../../src/configuration";
 
 class FakeFileSystem {
   constructor(private readonly executableFiles: readonly string[]) {}
@@ -18,18 +13,17 @@ class FakeFileSystem {
 }
 
 describe("configuration", () => {
-  test("prefers Iris settings over legacy settings", () => {
+  test("prefers client settings over legacy settings", () => {
     const config = resolveConfiguration({
-      iris: {
+      client: {
         serverPath: " /bin/iris ",
+      },
+      iris: {
+        serverPath: "/bin/flat-iris",
         sourceCommand: {
           program: "C:\\Program Files\\node.exe",
           arguments: ["source files.js", ' quoted "value" ', ""],
         },
-      },
-      purescriptAnalyzer: {
-        serverPath: "/bin/purescript-analyzer",
-        sourceCommand: { program: "legacy-source-command" },
       },
       pathValue: "",
     });
@@ -41,67 +35,56 @@ describe("configuration", () => {
     });
   });
 
-  test("uses legacy settings when Iris settings are empty", () => {
+  test("uses flat Iris settings when client settings are empty", () => {
     const config = resolveConfiguration({
-      iris: {
+      client: {
         serverPath: " ",
-        sourceCommand: null,
       },
-      purescriptAnalyzer: {
-        serverPath: " /bin/purescript-analyzer ",
-        sourceCommand: { program: "legacy-source-command" },
+      iris: {
+        serverPath: " /bin/iris ",
+        sourceCommand: { program: "iris-source-command" },
       },
       pathValue: "",
     });
 
-    assert.strictEqual(config.serverPath, "/bin/purescript-analyzer");
+    assert.strictEqual(config.serverPath, "/bin/iris");
     assert.deepStrictEqual(config.sourceCommand, {
-      program: "legacy-source-command",
+      program: "iris-source-command",
     });
   });
 
-  test("uses Spago source discovery when both source commands are unset", () => {
+  test("leaves source discovery unspecified when the source command is unset", () => {
     const config = resolveConfiguration({
       iris: { sourceCommand: null },
-      purescriptAnalyzer: { sourceCommand: null },
       pathValue: "",
     });
 
     assert.strictEqual(config.sourceCommand, undefined);
   });
 
-  test("searches server commands in the expected order", () => {
-    assert.deepStrictEqual(defaultServerCommands, [
-      "iris",
-      "purescript-analyzer",
-    ]);
-  });
-
-  test("finds the first executable server command on PATH", () => {
+  test("resolves iris from PATH", () => {
     const firstDirectory = path.join("tmp", "first");
     const secondDirectory = path.join("tmp", "second");
     const pathValue = [firstDirectory, secondDirectory].join(":");
-    const fileSystem = new FakeFileSystem([
-      path.join(firstDirectory, "purescript-analyzer"),
-      path.join(secondDirectory, "iris"),
-    ]);
+    const fileSystem = new FakeFileSystem([path.join(secondDirectory, "iris")]);
 
-    const executablePath = findFirstExecutable(
-      defaultServerCommands,
+    const config = resolveConfiguration({
+      fileSystem,
       pathValue,
-      {
-        fileSystem,
-        platform: "darwin",
-      },
-    );
+      platform: "darwin",
+    });
 
-    assert.strictEqual(executablePath, path.join(secondDirectory, "iris"));
+    assert.strictEqual(config.serverPath, path.join(secondDirectory, "iris"));
   });
 
-  test("falls back to iris when no server command is found", () => {
+  test("does not detect the legacy server command", () => {
+    const directory = path.join("tmp", "bin");
     const config = resolveConfiguration({
-      pathValue: "",
-      fileSystem: new FakeFileSystem([]),
+      pathValue: directory,
+      fileSystem: new FakeFileSystem([
+        path.join(directory, "purescript-analyzer"),
+      ]),
+      platform: "darwin",
     });
 
     assert.strictEqual(config.serverPath, "iris");
@@ -110,10 +93,13 @@ describe("configuration", () => {
 
   test("uses PATHEXT when searching for Windows executables", () => {
     const directory = "C:\\Tools";
-    const executablePath = path.join(directory, "iris.EXE");
+    const executablePath = path.join(directory, "iris.CMD");
     const result = findExecutable("iris", directory, {
-      fileSystem: new FakeFileSystem([executablePath]),
-      pathExtensions: ".EXE;.CMD",
+      fileSystem: new FakeFileSystem([
+        path.join(directory, "iris.EXE"),
+        executablePath,
+      ]),
+      pathExtensions: ".CMD;.EXE",
       platform: "win32",
     });
 

@@ -12,20 +12,19 @@ import {
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
-  const config = workspace.getConfiguration("iris");
-  const legacyConfig = workspace.getConfiguration("purescriptAnalyzer");
+  const clientConfig = workspace.getConfiguration("iris.client");
+  const irisConfig = workspace.getConfiguration("iris");
   const resolvedConfig = resolveConfiguration({
-    iris: {
-      serverPath: config.get<string>("serverPath"),
-      sourceCommand: config.get<SourceCommand | null>("sourceCommand"),
+    client: {
+      serverPath: clientConfig.get<string>("serverPath"),
     },
-    purescriptAnalyzer: {
-      serverPath: legacyConfig.get<string>("serverPath"),
-      sourceCommand: legacyConfig.get<SourceCommand | null>("sourceCommand"),
+    iris: {
+      serverPath: irisConfig.get<string>("serverPath"),
+      sourceCommand: irisConfig.get<SourceCommand | null>("sourceCommand"),
     },
   });
 
-  const args: string[] = [];
+  const args = ["lsp"];
   if (resolvedConfig.sourceCommand) {
     args.push(
       "--config",
