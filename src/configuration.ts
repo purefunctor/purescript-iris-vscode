@@ -3,18 +3,11 @@ import * as path from "path";
 
 export const defaultServerCommand = "iris";
 
-export interface SourceCommand {
-  program: string;
-  arguments?: string[];
-}
-
 export interface ClientSettings {
   serverPath?: string;
 }
 
-export interface LegacySettings extends ClientSettings {
-  sourceCommand?: SourceCommand | null;
-}
+export interface LegacySettings extends ClientSettings {}
 
 export interface ConfigurationInput {
   client?: ClientSettings;
@@ -31,7 +24,6 @@ export interface ExecutableFileSystem {
 
 export interface ResolvedConfiguration {
   serverPath: string;
-  sourceCommand?: SourceCommand;
 }
 
 export function resolveConfiguration(
@@ -39,7 +31,6 @@ export function resolveConfiguration(
 ): ResolvedConfiguration {
   return {
     serverPath: resolveServerPath(input),
-    sourceCommand: resolveSourceCommand(input),
   };
 }
 
@@ -58,10 +49,6 @@ export function resolveServerPath(input: ConfigurationInput) {
     ) ||
     defaultServerCommand
   );
-}
-
-export function resolveSourceCommand(input: ConfigurationInput) {
-  return input.iris?.sourceCommand ?? undefined;
 }
 
 export interface FindExecutableOptions {

@@ -20,19 +20,11 @@ describe("configuration", () => {
       },
       iris: {
         serverPath: "/bin/flat-iris",
-        sourceCommand: {
-          program: "C:\\Program Files\\node.exe",
-          arguments: ["source files.js", ' quoted "value" ', ""],
-        },
       },
       pathValue: "",
     });
 
     assert.strictEqual(config.serverPath, "/bin/iris");
-    assert.deepStrictEqual(config.sourceCommand, {
-      program: "C:\\Program Files\\node.exe",
-      arguments: ["source files.js", ' quoted "value" ', ""],
-    });
   });
 
   test("uses flat Iris settings when client settings are empty", () => {
@@ -42,24 +34,11 @@ describe("configuration", () => {
       },
       iris: {
         serverPath: " /bin/iris ",
-        sourceCommand: { program: "iris-source-command" },
       },
       pathValue: "",
     });
 
     assert.strictEqual(config.serverPath, "/bin/iris");
-    assert.deepStrictEqual(config.sourceCommand, {
-      program: "iris-source-command",
-    });
-  });
-
-  test("leaves source discovery unspecified when the source command is unset", () => {
-    const config = resolveConfiguration({
-      iris: { sourceCommand: null },
-      pathValue: "",
-    });
-
-    assert.strictEqual(config.sourceCommand, undefined);
   });
 
   test("resolves iris from PATH", () => {
@@ -88,7 +67,6 @@ describe("configuration", () => {
     });
 
     assert.strictEqual(config.serverPath, "iris");
-    assert.strictEqual(config.sourceCommand, undefined);
   });
 
   test("uses PATHEXT when searching for Windows executables", () => {
