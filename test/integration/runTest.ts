@@ -143,29 +143,18 @@ function prepareWorkspace(
     recursive: true,
   });
 
-  const sourceFilesScript = path.join(workspacePath, "source files.js");
   fs.writeFileSync(
-    sourceFilesScript,
-    [
-      "const fs = require('fs');",
-      "const path = require('path');",
-      "const src = path.join(__dirname, 'src');",
-      "for (const file of fs.readdirSync(src)) {",
-      "  if (file.endsWith('.purs')) console.log(path.join('src', file));",
-      "}",
-      "",
-    ].join("\n"),
+    path.join(workspacePath, "spago.lock"),
+    JSON.stringify({
+      workspace: { packages: { "integration-test": { path: "." } } },
+      packages: {},
+    }),
   );
   fs.writeFileSync(
     path.join(vscodeDirectory, "settings.json"),
     JSON.stringify(
       {
         "iris.client.serverPath": irisPath,
-        "iris.server.sources": {
-          kind: "command",
-          program: process.execPath,
-          arguments: [sourceFilesScript],
-        },
       },
       null,
       2,

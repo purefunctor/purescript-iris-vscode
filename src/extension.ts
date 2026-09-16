@@ -1,5 +1,5 @@
 import { ExtensionContext, Uri, workspace } from "vscode";
-import { resolveConfiguration, SourceCommand } from "./configuration";
+import { resolveConfiguration } from "./configuration";
 import { normalizeWindowsFileUri } from "./uri";
 
 import {
@@ -20,23 +20,12 @@ export function activate(context: ExtensionContext) {
     },
     iris: {
       serverPath: irisConfig.get<string>("serverPath"),
-      sourceCommand: irisConfig.get<SourceCommand | null>("sourceCommand"),
     },
   });
 
-  const args = ["lsp"];
-  if (resolvedConfig.sourceCommand) {
-    args.push(
-      "--config",
-      JSON.stringify({
-        sources: { kind: "command", ...resolvedConfig.sourceCommand },
-      }),
-    );
-  }
-
   const serverOptions: ServerOptions = {
     command: resolvedConfig.serverPath,
-    args,
+    args: ["lsp"],
     transport: TransportKind.stdio,
   };
 
