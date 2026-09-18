@@ -106,9 +106,9 @@ async function initialize(): Promise<IntegrationTestContext> {
   await openWorkspaceDocument(context, "Main.purs");
 
   // Document symbols are cached per document version by the VS Code client, so
-  // a request cancelled while Iris is still loading would leave the outline
-  // empty until the document changes. Workspace symbols are not document
-  // scoped and therefore reflect readiness reliably.
+  // a document-symbol request that fails while Iris is still loading would
+  // leave the outline empty until the document changes. Workspace symbols are
+  // not document scoped and therefore reflect readiness reliably.
   await waitUntil("Iris to provide workspace symbols", async () => {
     const symbols = await vscode.commands.executeCommand<
       vscode.SymbolInformation[] | undefined
