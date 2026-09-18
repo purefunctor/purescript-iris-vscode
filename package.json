@@ -28,6 +28,7 @@
     "package": "vsce package --no-dependencies",
     "test": "npm run check && npm run compile && npm run test:unit && npm run test:integration",
     "test:integration": "npm run compile && npm run compile-tests && node out/test/integration/runTest.js",
+    "test:integration:failure": "npm run compile && npm run compile-tests && node out/test/integration/runTest.js failure",
     "test:unit": "npm run compile-tests && vitest run",
     "watch": "node esbuild.js --watch",
     "format": "prettier -w src/**/*.ts tsconfig.json package.json esbuild.js"
