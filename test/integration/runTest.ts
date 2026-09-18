@@ -15,8 +15,12 @@ dotenv.config({
 });
 
 async function main() {
+  const variant = process.argv[2] === "failure" ? "failure" : "prepared";
   const extensionDevelopmentPath = path.resolve(__dirname, "..", "..", "..");
-  const extensionTestsPath = path.resolve(__dirname, "suite");
+  const extensionTestsPath = path.resolve(
+    __dirname,
+    variant === "failure" ? "suite-failure" : "suite",
+  );
   const workspacePath = path.resolve(
     extensionDevelopmentPath,
     ".vscode-test",
@@ -43,7 +47,7 @@ async function main() {
   );
   const irisPath = requireExecutablePath("IRIS_PATH");
 
-  prepareWorkspace(workspacePath, fixturesPath, irisPath);
+  prepareWorkspace(workspacePath, fixturesPath, irisPath, variant);
   fs.rmSync(userDataPath, { recursive: true, force: true });
   fs.rmSync(extensionsPath, { recursive: true, force: true });
 
@@ -134,6 +138,7 @@ function prepareWorkspace(
   workspacePath: string,
   fixturesPath: string,
   irisPath: string,
+  variant: "prepared" | "failure",
 ) {
   const vscodeDirectory = path.join(workspacePath, ".vscode");
   const srcDirectory = path.join(workspacePath, "src");
@@ -143,13 +148,38 @@ function prepareWorkspace(
     recursive: true,
   });
 
-  fs.writeFileSync(
-    path.join(workspacePath, "spago.lock"),
-    JSON.stringify({
-      workspace: { packages: { "integration-test": { path: "." } } },
-      packages: {},
-    }),
-  );
+  // Start every run without prepared dependencies so startup preparation is
+  // exercised rather than satisfied by a stale `.spago` directory.
+  fs.rmSync(path.join(workspacePath, ".spago"), {
+    recursive: true,
+    force: true,
+  });
+  fs.rmSync(path.join(workspacePath, "spago.lock"), { force: true });
+  if (variant === "failure") {
+    fs.writeFileSync(
+      path.join(workspacePath, "spago.yaml"),
+      [
+        "workspace:",
+        "  packageSet:",
+        "    registry: 64.10.0",
+        "package:",
+        "  name: integration-test",
+        "  dependencies:",
+        "    - iris-nonexistent-dependency",
+        "",
+      ].join("\n"),
+    );
+  } else {
+    fs.copyFileSync(
+      path.join(fixturesPath, "project", "spago.yaml"),
+      path.join(workspacePath, "spago.yaml"),
+    );
+    fs.copyFileSync(
+      path.join(fixturesPath, "project", "spago.lock"),
+      path.join(workspacePath, "spago.lock"),
+    );
+  }
+
   fs.writeFileSync(
     path.join(vscodeDirectory, "settings.json"),
     JSON.stringify(
