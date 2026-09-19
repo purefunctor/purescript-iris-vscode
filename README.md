@@ -4,7 +4,10 @@
 
 ## Source discovery
 
-Iris discovers sources through `spago.lock`.
+Iris prepares the Spago workspace during startup: it runs `spago fetch` in the workspace root
+before serving analysis. If preparation fails, Iris reports the failure and does not serve analysis
+from the partially installed project; correct the project and restart Iris. Discovered sources come
+from `spago.yaml` and the fetched `.spago` checkouts.
 
 ## Settings
 

@@ -103,12 +103,16 @@ async function initialize(): Promise<IntegrationTestContext> {
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
   assert.ok(workspaceFolder, "Expected the test workspace to be open.");
   const context = { extension, workspaceFolder };
-  const document = await openWorkspaceDocument(context, "Main.purs");
+  await openWorkspaceDocument(context, "Main.purs");
 
-  await waitUntil("Iris to provide document symbols", async () => {
+  // Document symbols are cached per document version by the VS Code client, so
+  // a document-symbol request that fails while Iris is still loading would
+  // leave the outline empty until the document changes. Workspace symbols are
+  // not document scoped and therefore reflect readiness reliably.
+  await waitUntil("Iris to provide workspace symbols", async () => {
     const symbols = await vscode.commands.executeCommand<
-      (vscode.DocumentSymbol | vscode.SymbolInformation)[] | undefined
-    >("vscode.executeDocumentSymbolProvider", document.uri);
+      vscode.SymbolInformation[] | undefined
+    >("vscode.executeWorkspaceSymbolProvider", "identity");
     return symbols?.some((symbol) => symbol.name === "identity") || undefined;
   });
 
