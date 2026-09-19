@@ -46,6 +46,12 @@ async function main() {
     "fixtures",
   );
   const irisPath = requireExecutablePath("IRIS_PATH");
+  const spagoPath = path.resolve(
+    extensionDevelopmentPath,
+    "node_modules",
+    ".bin",
+    process.platform === "win32" ? "spago.cmd" : "spago",
+  );
 
   prepareWorkspace(workspacePath, fixturesPath, irisPath, variant);
   fs.rmSync(userDataPath, { recursive: true, force: true });
@@ -64,6 +70,7 @@ async function main() {
     vscodeExecutablePath,
     extensionDevelopmentPath,
     extensionTestsPath,
+    extensionTestsEnv: { IRIS_SPAGO: spagoPath },
     launchArgs: [
       workspacePath,
       "--user-data-dir",

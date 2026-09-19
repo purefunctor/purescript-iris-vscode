@@ -96,6 +96,13 @@ jobs:
             iris_channel: canary
             iris-executable: iris
             test-command: xvfb-run -a npm run test:integration
+          - platform: Linux startup failure
+            os: ubuntu-24.04
+            version_label: stable
+            vscode_version: stable
+            iris_channel: canary
+            iris-executable: iris
+            test-command: xvfb-run -a npm run test:integration:failure
 
     env:
       GH_TOKEN: ${{ github.token }}

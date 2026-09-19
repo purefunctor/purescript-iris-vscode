@@ -43,6 +43,7 @@
     "esbuild": "^0.28.1",
     "mocha": "^11.8.0",
     "prettier": "^3.8.3",
+    "spago": "^1.0.4",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6",
     "vscode-languageclient": "^9.0.1"
