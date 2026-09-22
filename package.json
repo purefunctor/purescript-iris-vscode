@@ -4,7 +4,7 @@
   "description": "purescript-iris integration for Visual Studio Code",
   "author": "Justin Garcia",
   "license": "BSD-3-Clause",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/purefunctor/purescript-iris-vscode"
