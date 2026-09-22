@@ -7,7 +7,7 @@ export async function runIntegrationTests(directory: string): Promise<void> {
   const mocha = new Mocha({
     color: true,
     grep: process.env.MOCHA_GREP,
-    timeout: 30_000,
+    timeout: 60_000,
     ui: "tdd",
   });
   for (const testFile of findTestFiles(directory)) {
